@@ -23,10 +23,12 @@ cartModal.addEventListener('click', function(event){
     cartModal.style.display = 'none'
  }  
 })
+
 //botao de fechar dentro do modal
 closeModalBtn.addEventListener('click', function(){
     cartModal.style.display = 'none'
 })
+
 // botao icone do carrinho
 menu.addEventListener('click', function(event){
   let parentButton = event.target.closest('.add-to-cart-btn')
@@ -34,8 +36,7 @@ menu.addEventListener('click', function(event){
     const name = parentButton.getAttribute('data-name')
     const price = parseFloat(parentButton.getAttribute('data-price')) /* parseFloaat é para converter em numero*/
     // Adicional no carrinho
-    addtoCart(name, price)
-    
+    addtoCart(name, price)    
   }
 })
 
@@ -52,9 +53,9 @@ function addtoCart(name, price){
         quantity: 1,  
       })
     } 
-    updateCartModal()  
-    
+    updateCartModal()      
 }
+
 // atualiza carrinho
 function updateCartModal(){
 cartItemsContainer.innerHTML = '';
@@ -71,15 +72,13 @@ cart.forEach(item => {
   <p>Quant:${item.quantity}</p>
   <p class='font-medium mt-2'> R$ ${item.price.toFixed(2)}</p>
   </div>  
-  <button class='remove-from-cart-btn' data-name='${item.name}'> Remover </button>
-  </div>
-
-  `
+  <button class='remove-from-cart-btn' data-name='${item.name}'>Remover</button>
+  </div> `
   total += item.price * item.quantity;
 
   cartItemsContainer.appendChild(cartItemElement)
-
 })
+
 cartTotal.textContent = total.toLocaleString('pt-BR',{
 style:'currency',
 currency: 'BRL'
@@ -88,7 +87,7 @@ currency: 'BRL'
 cartCounter.innerHTML = cart.length;
 
 }
-// Funçaõ remover item do carrinho
+// Função remover item do carrinho
 cartItemsContainer.addEventListener('click', function(event){
   if (event.target.classList.contains('remove-from-cart-btn')){
     const name = event.target.getAttribute('data-name')
@@ -110,41 +109,62 @@ function removeItemCart(name){
     cart.splice(index, 1);
     updateCartModal();
   }
-
 }
+
 // campo do endereço
 addressInput.addEventListener('input', function(event){
 let inputValue = event.target.value;
 if (inputValue !== ''){
   addressInput.classList.remove('border-red-500')
   addressWarn.classList.add('hidden')
-
 }
 
-})
+})//Finalizar o pedido
 checkoutBtn.addEventListener('click', function(){
+const isOpen = checkRestaurantOpen();
+if (!isOpen){
+  alert('RESTAURANTE FECHADO NO MOMENTO!')
+  return;
+}
   if (cart.length === 0) return;
   if (addressInput.value === ''){
     addressWarn.classList.remove('hidden')
     addressInput.classList.add('border-red-500')
     return;
   }
+
+  // Enviar o pedido para o whatsapp
+  const cartItems = cart.map((item)=> {
+  return (
+  `${item.name} Quantidade: (${item.quantity}) Preço: R$ ${item.price} | `
+)
+  }).join('')
+
+  const message = encodeURIComponent(cartItems)
+  const phone = '46999290989'
+
+  window.open(`https://wa.me/${phone}?text=${message} Endereço: ${addressInput.value}`, '_blank')
+
+  cart = []; // limpando o carrinho
+  updateCartModal();
 })
+
+
 // verificar a hora abertura e fechamento do restaurante
 function checkRestaurantOpen(){
   const data = new Date();
   const hora = data.getHours();
-  return hora >= 18 && < 22; // true - aberto
+  return hora >= 18 && hora < 22; // true - aberto
 }
 const spanItem = document.getElementById('date-span')
-const isOpen = checkRestaurantOpen();
+const isOpen = checkRestaurantOpen(); // verifica horario restaurante
 
 if (isOpen){
-  spanItem.classList.remove('bg-red-500');
-  spanItem.classList.add('bg-green-600')
+  spanItem.classList.remove('bg-red-500'); // fechado
+  spanItem.classList.add('bg-green-600') // aberto
 }else{
-  spanItem.classList.remove('bg-green-600');
-  spanItem.classList.add('bg-red-500')
+  spanItem.classList.remove('bg-green-600') // aberto
+  spanItem.classList.add('bg-red-500') // fechado
 }
 
 
