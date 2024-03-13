@@ -14,6 +14,7 @@ let cart = []; /* array do carrinho começa vazio*/
 // Abrir o modal do carrinho
 cartBtn.addEventListener('click', function(){
     cartModal.style.display = 'flex' /* esta função mostra o carrinho*/
+    updateCartModal();
 })
 
 // Fechar o modal
@@ -61,26 +62,89 @@ let total = 0;
 
 cart.forEach(item => {
   const cartItemElement = document.createElement('div');
+  cartItemElement.classList.add('flex','justify-between', 'mb-4', 'flex-col')
 
   cartItemElement.innerHTML = `
+   <div class='flex items-center justify-between'>
   <div>
-  <div>
-  <p>${item.name}</p>
-  <p>${item.quantity}</p>
-  <p> R$ ${item.price}</p>
-  </div>
-  <div>
-  <button>
-  Remover
-  </button>
-  </div>
-
+  <p class='font-bold'>${item.name}</p>
+  <p>Quant:${item.quantity}</p>
+  <p class='font-medium mt-2'> R$ ${item.price.toFixed(2)}</p>
+  </div>  
+  <button class='remove-from-cart-btn' data-name='${item.name}'> Remover </button>
   </div>
 
   `
+  total += item.price * item.quantity;
+
   cartItemsContainer.appendChild(cartItemElement)
 
 })
+cartTotal.textContent = total.toLocaleString('pt-BR',{
+style:'currency',
+currency: 'BRL'
+});
+
+cartCounter.innerHTML = cart.length;
 
 }
+// Funçaõ remover item do carrinho
+cartItemsContainer.addEventListener('click', function(event){
+  if (event.target.classList.contains('remove-from-cart-btn')){
+    const name = event.target.getAttribute('data-name')
+
+    removeItemCart(name);
+  }
+})
+function removeItemCart(name){
+  const index = cart.findIndex(item => item.name === name);
+
+  if (index !== -1){
+    const item = cart[index];
+
+    if (item.quantity > 1){
+      item.quantity -= 1;
+      updateCartModal();
+      return;
+    }
+    cart.splice(index, 1);
+    updateCartModal();
+  }
+
+}
+// campo do endereço
+addressInput.addEventListener('input', function(event){
+let inputValue = event.target.value;
+if (inputValue !== ''){
+  addressInput.classList.remove('border-red-500')
+  addressWarn.classList.add('hidden')
+
+}
+
+})
+checkoutBtn.addEventListener('click', function(){
+  if (cart.length === 0) return;
+  if (addressInput.value === ''){
+    addressWarn.classList.remove('hidden')
+    addressInput.classList.add('border-red-500')
+    return;
+  }
+})
+// verificar a hora abertura e fechamento do restaurante
+function checkRestaurantOpen(){
+  const data = new Date();
+  const hora = data.getHours();
+  return hora >= 18 && < 22; // true - aberto
+}
+const spanItem = document.getElementById('date-span')
+const isOpen = checkRestaurantOpen();
+
+if (isOpen){
+  spanItem.classList.remove('bg-red-500');
+  spanItem.classList.add('bg-green-600')
+}else{
+  spanItem.classList.remove('bg-green-600');
+  spanItem.classList.add('bg-red-500')
+}
+
 
